@@ -29,7 +29,7 @@ class GameFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        /*Свойству _binding присваивается экземпляр FragmentOrderBinding в методе onCreateView()*/
+        /*Свойству _binding присваивается экземпляр FragmentGameBinding в методе onCreateView()*/
         _binding = FragmentGameBinding.inflate(inflater, container, false)
         val view = binding.root
         // определите, как должно отобрадаться секретное слово и обновите экран
@@ -63,7 +63,7 @@ class GameFragment : Fragment() {
     fun updateScreen() {
         binding.word.text = secretWordDisplay
         binding.lives.text = "У Вас осталось $livesLeft жизней. "
-        binding.incorrectGuesses.text = "Неверных догадок $incorrectGuesses"
+        binding.incorrectGuesses.text = "Неверные буквы $incorrectGuesses"
     }
 
     // Эта функция создает строку для того, как секретное слово должно отображаться на экране
