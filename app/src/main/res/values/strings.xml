@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Guessing Game</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="letter">Угадай букву</string>
+    <string name="guess">Ввод буквы</string>
 </resources>
