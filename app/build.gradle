@@ -51,4 +51,5 @@ dependencies {
     //Компонент Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:2.5.3"
 
+
 }

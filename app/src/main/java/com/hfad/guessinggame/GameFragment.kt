@@ -1,12 +1,14 @@
 package com.hfad.guessinggame
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.hfad.guessinggame.databinding.FragmentGameBinding
+import com.hfad.guessinggame.viewmodel.GameViewModel
 
 
 class GameFragment : Fragment() {
@@ -17,12 +19,8 @@ class GameFragment : Fragment() {
     private var _binding: FragmentGameBinding? = null
     private val binding get() = _binding!!
 
-    val words = listOf("Android", "Activity", "Fragment") //доступные для угадывания слова
-    val secretWord = words.random().uppercase()//слово, которое пользователь должен угадать
-    var secretWordDisplay = ""// как отображается это слово
-    var correctGuesses = ""          // правильно
-    var incorrectGuesses = ""       // неправильно
-    var livesLeft = 8                   // жизни
+    //Определил свойство viewModel, которое будет инициализировано позже в коде
+    lateinit var viewModel: GameViewModel
 
 
     override fun onCreateView(
@@ -32,19 +30,24 @@ class GameFragment : Fragment() {
         /*Свойству _binding присваивается экземпляр FragmentGameBinding в методе onCreateView()*/
         _binding = FragmentGameBinding.inflate(inflater, container, false)
         val view = binding.root
-        // определите, как должно отобрадаться секретное слово и обновите экран
-        secretWordDisplay = deriveSecretWordDisplay()
+        /* :: в коде ниже используется для получения ссылки на класс GameViewModel.
+         Мы должны использовать этот синтаксис, потому что метод get () ViewModelProvider требует ссылки
+         на класс GameViewModel вместо объекта GameViewModel.*/
+        //Устанавливаю свойство viewModel
+        viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
+
         updateScreen()
 
         binding.guessButton.setOnClickListener {
-            //Вызовите makeGuess, чтобы разобраться с предположениями пользователя
-            makeGuess(binding.guess.text.toString().uppercase())
+            //Вызоваем makeGuess, чтобы разобраться с предположениями пользователя
+            /** Методы makeGuess(),isWon(), isLost (), wonLostMessage() должны быть доступны через свойство viewModel*/
+            viewModel.makeGuess(binding.guess.text.toString().uppercase())
             binding.guess.text = null  // сбросить текст редактирования
             updateScreen()  // обновить экран
             // если пользователь выиграл или проиграл перейдите к ResultFragment передав значение сообщения
-            if (isWon() || isLost()) {
+            if (viewModel.isWon() || viewModel.isLost()) {
                 val action =
-                    GameFragmentDirections.actionGameFragmentToResultFragment(wonLostMessage())
+                    GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
                 view.findNavController().navigate(action)
             }
 
@@ -53,64 +56,18 @@ class GameFragment : Fragment() {
 
     }
 
+    // Установис TextView макета
+    fun updateScreen() {
+        binding.word.text = viewModel.secretWordDisplay
+        binding.lives.text = "У Вас осталось ${viewModel.livesLeft} жизней. "
+        binding.incorrectGuesses.text = "Неверные буквы ${viewModel.incorrectGuesses}"
+    }
+
     /* Когда фрагмент больше не имеет доступа к своему макету, установите для свойства _binding значение null*/
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    // установите TextView макета
-    fun updateScreen() {
-        binding.word.text = secretWordDisplay
-        binding.lives.text = "У Вас осталось $livesLeft жизней. "
-        binding.incorrectGuesses.text = "Неверные буквы $incorrectGuesses"
-    }
-
-    // Эта функция создает строку для того, как секретное слово должно отображаться на экране
-    fun deriveSecretWordDisplay(): String {
-        var display = ""
-        secretWord.forEach {
-            display += checkLetter(it.toString()) /*Вызовите checkLetter для каждой буквы в секретном слове
-        и добавьте ее возвращаемое значение в конец отображаемой переменной*/
-
-        }
-        return display
-    }
-
-    /*Эта функция проверяет, содержит ли секретное слово букву, которую угадал пользователь,
-    если да, то возвращает букву. Если нет, то он возвращает "_"*/
-    fun checkLetter(str: String) = when (correctGuesses.contains(str)) {
-        true -> str
-        false -> "_"
-    }
-
-    fun makeGuess(guess: String) {//Эта функция вызывается каждый раз, когда пользователь делает предположение
-        if (guess.length == 1) {
-            /*Для каждого правильного предположения обновляйте
-             правильные догадки и отображайте секретное слово*/
-            if (secretWord.contains(guess)) {
-
-                correctGuesses += guess
-                secretWordDisplay = deriveSecretWordDisplay()
-                //За каждое неверное предположение обновляйте неверные догадки и жизни
-            } else {
-                incorrectGuesses += "$guess"
-                livesLeft--
-            }
-        }
-    }
-
-    //Игра считается выигранной, если секретное слово соответствует отображаемому секретному слову
-    fun isLost() = livesLeft <= 0
-
-    //игра проиграна, если у пользователя кончились жизни
-    fun isWon() = secretWord.equals(secretWordDisplay, true)
-    fun wonLostMessage(): String {
-        var message = ""
-        if (isWon()) message = "Выиграл!"
-        else if (isLost()) message = "Проиграл!"
-        message += "Было загадано $secretWord."
-        return message //wonLostMessage() возвращает строку, выиграл ли пользователь и каким было секретное слово
-    }
 
 }
