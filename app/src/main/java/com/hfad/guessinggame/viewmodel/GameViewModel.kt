@@ -8,7 +8,7 @@ class GameViewModel : ViewModel() {
     var secretWordDisplay = ""// как отображается это слово
     var correctGuesses = ""          // правильно
     var incorrectGuesses = ""       // неправильно
-    var livesLeft = 8                   // жизни
+    var livesLeft = 2                  // жизни
 
     init {
         // определите, как должно отобрадаться секретное слово и обновите экран. Запускается, когда класс инициализирован.

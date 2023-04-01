@@ -1,6 +1,7 @@
 package com.hfad.guessinggame
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,13 +21,15 @@ class GameFragment : Fragment() {
     private val binding get() = _binding!!
 
     //Определил свойство viewModel, которое будет инициализировано позже в коде
-    lateinit var viewModel: GameViewModel
+    private lateinit var viewModel: GameViewModel
 
 
     override fun onCreateView(
+
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("Метод","Вызывается" )
         /*Свойству _binding присваивается экземпляр FragmentGameBinding в методе onCreateView()*/
         _binding = FragmentGameBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -61,12 +64,14 @@ class GameFragment : Fragment() {
         binding.word.text = viewModel.secretWordDisplay
         binding.lives.text = "У Вас осталось ${viewModel.livesLeft} жизней. "
         binding.incorrectGuesses.text = "Неверные буквы ${viewModel.incorrectGuesses}"
+
     }
 
     /* Когда фрагмент больше не имеет доступа к своему макету, установите для свойства _binding значение null*/
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        Log.d("Метод","Вызывается" )
     }
 
 
