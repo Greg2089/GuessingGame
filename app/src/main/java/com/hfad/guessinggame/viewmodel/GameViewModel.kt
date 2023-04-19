@@ -1,18 +1,20 @@
 package com.hfad.guessinggame.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel : ViewModel() {
     val words = listOf("Android", "Activity", "Fragment") //доступные для угадывания слова
     val secretWord = words.random().uppercase()//слово, которое пользователь должен угадать
-    var secretWordDisplay = ""// как отображается это слово
+    val secretWordDisplay = MutableLiveData<String>()// как отображается это слово
     var correctGuesses = ""          // правильно
-    var incorrectGuesses = ""       // неправильно
-    var livesLeft = 2                  // жизни
+    val incorrectGuesses = MutableLiveData<String>(" ")      // неправильно
+    val livesLeft = MutableLiveData<Int>(2) // жизни
 
     init {
         // определите, как должно отобрадаться секретное слово и обновите экран. Запускается, когда класс инициализирован.
-        secretWordDisplay = deriveSecretWordDisplay()
+        //value - установка значения свойства secretWordDisplay (liveData)
+        secretWordDisplay.value = deriveSecretWordDisplay()
     }
 
     // Эта функция создает строку для того, как секретное слово должно отображаться на экране
@@ -40,20 +42,24 @@ class GameViewModel : ViewModel() {
             if (secretWord.contains(guess)) {
 
                 correctGuesses += guess
-                secretWordDisplay = deriveSecretWordDisplay()
+                secretWordDisplay.value = deriveSecretWordDisplay()
                 //За каждое неверное предположение обновляйте неверные догадки и жизни
             } else {
-                incorrectGuesses += "$guess"
-                livesLeft--
+                incorrectGuesses.value += "$guess"
+                /* строка livesLeft-- удаляеся,поскольку свойство value может быть null,
+                мы не можем, сказать, вычесть единицу из его значения. Вместо нее используем:*/
+                livesLeft.value = livesLeft.value?.minus(1)
             }
         }
     }
 
-    //Игра считается выигранной, если секретное слово соответствует отображаемому секретному слову
-    fun isLost() = livesLeft <= 0
+    /*Игра считается выигранной, если секретное слово соответствует отображаемому секретному слову.
+    liveData: если value null, Elvis возвращает 0. Это значит, что функция возвращет true, когда
+    значение liveLeft null или <=0*/
+    fun isLost() = (livesLeft.value ?: 0) <= 0
 
     //игра проиграна, если у пользователя кончились жизни
-    fun isWon() = secretWord.equals(secretWordDisplay, true)
+    fun isWon() = secretWord.equals(secretWordDisplay.value, true)
     fun wonLostMessage(): String {
         var message = ""
         if (isWon()) message = "Выиграл!"

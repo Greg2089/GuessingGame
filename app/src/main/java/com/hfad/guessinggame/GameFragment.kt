@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.hfad.guessinggame.databinding.FragmentGameBinding
@@ -29,7 +30,7 @@ class GameFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d("Метод","Вызывается" )
+        Log.d("Метод", "Вызывается")
         /*Свойству _binding присваивается экземпляр FragmentGameBinding в методе onCreateView()*/
         _binding = FragmentGameBinding.inflate(inflater, container, false)
         val view = binding.root
@@ -39,14 +40,23 @@ class GameFragment : Fragment() {
         //Устанавливаю свойство viewModel
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
-        updateScreen()
-
+        /*updateScreen() Изменения из главы 12: удаляем updateScreen(),
+        так как мы используем оперативные данные (live data) для обновления значений, отображаемых на экране.*/
+        viewModel.incorrectGuesses.observe(viewLifecycleOwner, Observer { newValue ->
+            binding.incorrectGuesses.text = "Неверные буквы $newValue"
+        })
+        viewModel.livesLeft.observe(viewLifecycleOwner, Observer{ newValue ->
+            binding.lives.text = "Количество жизней $newValue"
+        })
+        viewModel.secretWordDisplay.observe(viewLifecycleOwner, Observer { newValue ->
+            binding.word.text = newValue
+        })
         binding.guessButton.setOnClickListener {
             //Вызоваем makeGuess, чтобы разобраться с предположениями пользователя
             /** Методы makeGuess(),isWon(), isLost (), wonLostMessage() должны быть доступны через свойство viewModel*/
             viewModel.makeGuess(binding.guess.text.toString().uppercase())
             binding.guess.text = null  // сбросить текст редактирования
-            updateScreen()  // обновить экран
+           // Изменения глава 12: удаляем updateScreen()  // обновить экран
             // если пользователь выиграл или проиграл перейдите к ResultFragment передав значение сообщения
             if (viewModel.isWon() || viewModel.isLost()) {
                 val action =
@@ -59,19 +69,20 @@ class GameFragment : Fragment() {
 
     }
 
+    /* Глава 12:Удаляем этот метод, т.к. используем live data
     // Установис TextView макета
     fun updateScreen() {
         binding.word.text = viewModel.secretWordDisplay
         binding.lives.text = "У Вас осталось ${viewModel.livesLeft} жизней. "
         binding.incorrectGuesses.text = "Неверные буквы ${viewModel.incorrectGuesses}"
 
-    }
+    }*/
 
     /* Когда фрагмент больше не имеет доступа к своему макету, установите для свойства _binding значение null*/
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.d("Метод","Вызывается" )
+        Log.d("Метод", "Вызывается")
     }
 
 
