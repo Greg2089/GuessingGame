@@ -1,24 +1,36 @@
 package com.hfad.guessinggame.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel : ViewModel() {
-    val words = listOf("Android", "Activity", "Fragment") //доступные для угадывания слова
-    val secretWord = words.random().uppercase()//слово, которое пользователь должен угадать
-    val secretWordDisplay = MutableLiveData<String>()// как отображается это слово
-    var correctGuesses = ""          // правильно
-    val incorrectGuesses = MutableLiveData<String>(" ")      // неправильно
-    val livesLeft = MutableLiveData<Int>(2) // жизни
+    private val words = listOf("Android", "Activity", "Fragment") //доступные для угадывания слова
+    private val secretWord = words.random().uppercase()//слово, которое пользователь должен угадать
+    private val _secretWordDisplay = MutableLiveData<String>()// как отображается это слово
+    val secretWordDisplay: LiveData<String>
+        get() = _secretWordDisplay
+    private var correctGuesses = ""          // правильно
+    private val _incorrectGuesses = MutableLiveData<String>(" ")      // неправильно
+    val incorrectGuesses: LiveData<String>
+        get() = _incorrectGuesses
+    private val _livesLeft = MutableLiveData<Int>(2) // жизни
+    val livesLeft: LiveData<Int>
+        get() = _livesLeft
+
+    //добавляю свойство для завершения игры в ViewModel вместо GameFragment
+    private val _gameOver = MutableLiveData<Boolean>(false)
+    val gameOver: LiveData<Boolean>
+        get() = _gameOver
 
     init {
         // определите, как должно отобрадаться секретное слово и обновите экран. Запускается, когда класс инициализирован.
         //value - установка значения свойства secretWordDisplay (liveData)
-        secretWordDisplay.value = deriveSecretWordDisplay()
+        _secretWordDisplay.value = deriveSecretWordDisplay()
     }
 
     // Эта функция создает строку для того, как секретное слово должно отображаться на экране
-    fun deriveSecretWordDisplay(): String {
+    private fun deriveSecretWordDisplay(): String {
         var display = ""
         secretWord.forEach {
             display += checkLetter(it.toString()) /*Вызовите checkLetter для каждой буквы в секретном слове
@@ -30,7 +42,7 @@ class GameViewModel : ViewModel() {
 
     /*Эта функция проверяет, содержит ли секретное слово букву, которую угадал пользователь,
     если да, то возвращает букву. Если нет, то он возвращает "_"*/
-    fun checkLetter(str: String) = when (correctGuesses.contains(str)) {
+    private fun checkLetter(str: String) = when (correctGuesses.contains(str)) {
         true -> str
         false -> "_"
     }
@@ -42,24 +54,25 @@ class GameViewModel : ViewModel() {
             if (secretWord.contains(guess)) {
 
                 correctGuesses += guess
-                secretWordDisplay.value = deriveSecretWordDisplay()
+                _secretWordDisplay.value = deriveSecretWordDisplay()
                 //За каждое неверное предположение обновляйте неверные догадки и жизни
             } else {
-                incorrectGuesses.value += "$guess"
+                _incorrectGuesses.value += "$guess"
                 /* строка livesLeft-- удаляеся,поскольку свойство value может быть null,
                 мы не можем, сказать, вычесть единицу из его значения. Вместо нее используем:*/
-                livesLeft.value = livesLeft.value?.minus(1)
+                _livesLeft.value = livesLeft.value?.minus(1)
             }
+            if (isWon() || isLost()) _gameOver.value = true
         }
     }
 
     /*Игра считается выигранной, если секретное слово соответствует отображаемому секретному слову.
     liveData: если value null, Elvis возвращает 0. Это значит, что функция возвращет true, когда
     значение liveLeft null или <=0*/
-    fun isLost() = (livesLeft.value ?: 0) <= 0
+    private fun isLost() = (livesLeft.value ?: 0) <= 0
 
     //игра проиграна, если у пользователя кончились жизни
-    fun isWon() = secretWord.equals(secretWordDisplay.value, true)
+    private fun isWon() = secretWord.equals(secretWordDisplay.value, true)
     fun wonLostMessage(): String {
         var message = ""
         if (isWon()) message = "Выиграл!"
@@ -69,3 +82,11 @@ class GameViewModel : ViewModel() {
     }
 
 }
+/**
+ * Глава 12
+ * 1) livesLeft, incorrectGuesses и secretWordDisplay -
+ * это свойства LiveData, которые ссылаются на те же базовые объекты,
+ * что и их вспомогательные свойства MutableLiveData.
+ * 2) GameFragment не может обновить ни одно из этих свойств, но он реагирует,
+ * когда GameViewModel обновляет любое из вспомогательных свойств,
+ * потому что они ссылаются на один и тот же базовый объект.*/

@@ -45,24 +45,33 @@ class GameFragment : Fragment() {
         viewModel.incorrectGuesses.observe(viewLifecycleOwner, Observer { newValue ->
             binding.incorrectGuesses.text = "Неверные буквы $newValue"
         })
-        viewModel.livesLeft.observe(viewLifecycleOwner, Observer{ newValue ->
+        viewModel.livesLeft.observe(viewLifecycleOwner, Observer { newValue ->
             binding.lives.text = "Количество жизней $newValue"
         })
         viewModel.secretWordDisplay.observe(viewLifecycleOwner, Observer { newValue ->
             binding.word.text = newValue
+        })
+        //это заставляет фрагмент наблюдать за моделью представления свойства gameOver
+        viewModel.gameOver.observe(viewLifecycleOwner, Observer { newValue ->
+            if (newValue) {
+                val action = GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
+                view.findNavController().navigate(action)
+            }
         })
         binding.guessButton.setOnClickListener {
             //Вызоваем makeGuess, чтобы разобраться с предположениями пользователя
             /** Методы makeGuess(),isWon(), isLost (), wonLostMessage() должны быть доступны через свойство viewModel*/
             viewModel.makeGuess(binding.guess.text.toString().uppercase())
             binding.guess.text = null  // сбросить текст редактирования
-           // Изменения глава 12: удаляем updateScreen()  // обновить экран
+            // Изменения глава 12: удаляем updateScreen()  // обновить экран
             // если пользователь выиграл или проиграл перейдите к ResultFragment передав значение сообщения
+
+            /* Глава12: Удаляем эту логику
             if (viewModel.isWon() || viewModel.isLost()) {
-                val action =
-                    GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
-                view.findNavController().navigate(action)
-            }
+                 val action =
+                     GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
+                 view.findNavController().navigate(action)
+             }*/
 
         }
         return view
