@@ -1,5 +1,6 @@
 package com.hfad.guessinggame
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,6 +41,12 @@ class GameFragment : Fragment() {
         //Устанавливаю свойство viewModel
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
+        //Глава 13: Устанавливаем переменные data binding
+        binding.gameViewModel = viewModel
+        //Это позволяет макету реагировать на оперативные обновления данных (live data)
+        binding.lifecycleOwner = viewLifecycleOwner
+
+        /*Глава 13: Удаляем этот код, т.к. испольуем data binding
         /*updateScreen() Изменения из главы 12: удаляем updateScreen(),
         так как мы используем оперативные данные (live data) для обновления значений, отображаемых на экране.*/
         viewModel.incorrectGuesses.observe(viewLifecycleOwner, Observer { newValue ->
@@ -50,11 +57,13 @@ class GameFragment : Fragment() {
         })
         viewModel.secretWordDisplay.observe(viewLifecycleOwner, Observer { newValue ->
             binding.word.text = newValue
-        })
+        })*/
+
         //это заставляет фрагмент наблюдать за моделью представления свойства gameOver
         viewModel.gameOver.observe(viewLifecycleOwner, Observer { newValue ->
             if (newValue) {
-                val action = GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
+                val action =
+                    GameFragmentDirections.actionGameFragmentToResultFragment(viewModel.wonLostMessage())
                 view.findNavController().navigate(action)
             }
         })

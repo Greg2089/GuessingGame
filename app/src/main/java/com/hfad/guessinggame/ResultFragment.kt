@@ -43,7 +43,10 @@ class ResultFragment : Fragment() {
 
         //binding.wonLost.text = ResultFragmentArgs.fromBundle(requireArguments()).result
         //показывем результат из ViewModel
-        binding.wonLost.text = viewModel.result
+        //Глава 13: Установил переменную привязки данных (data binding) макета
+        binding.resultViewModel = viewModel
+        /*13: УДАЛЯЕМ строку. т.к. используем data binding
+        binding.wonLost.text = viewModel.result*/
         binding.newGameButton.setOnClickListener {
             view.findNavController().navigate(R.id.action_resultFragment_to_gameFragment)
         }

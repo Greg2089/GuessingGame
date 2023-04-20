@@ -24,7 +24,7 @@ class GameViewModel : ViewModel() {
         get() = _gameOver
 
     init {
-        // определите, как должно отобрадаться секретное слово и обновите экран. Запускается, когда класс инициализирован.
+        // определите, как должно отображаться секретное слово и обновите экран. Запускается, когда класс инициализирован.
         //value - установка значения свойства secretWordDisplay (liveData)
         _secretWordDisplay.value = deriveSecretWordDisplay()
     }
@@ -79,6 +79,12 @@ class GameViewModel : ViewModel() {
         else if (isLost()) message = "Проиграл!"
         message += "Было загадано $secretWord."
         return message //wonLostMessage() возвращает строку, выиграл ли пользователь и каким было секретное слово
+    }
+
+    //Глава 13: Метод для завершения игры
+    fun finishGame() {
+        _gameOver.value = true
+
     }
 
 }

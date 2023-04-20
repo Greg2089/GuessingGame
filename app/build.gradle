@@ -33,10 +33,15 @@ android {
     }
     //safe args
     apply plugin: 'androidx.navigation.safeargs'
-    //viewBinding
+
     buildFeatures {
-        viewBinding = true
+        /*viewBinding отключаем, т.к. DB тоже генерирует классы FragmentGameBinding и
+        FragmentResultBinding, а точне для тех макетов, у которых есть элемент <layout>*/
+        //viewBinding true
+        //data binding (DB)
+        dataBinding true
     }
+
 }
 
 dependencies {

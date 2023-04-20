@@ -5,4 +5,7 @@
     <string name="letter">Угадай букву</string>
     <string name="guess">Ввод буквы</string>
     <string name="new_game">Начать новую игру</string>
+    <string name="lives_left">Количество жизней: %d</string>
+    <string name="incorrect_guesses">Неверные буквы: %s</string>
+    <string name="finishGame">Завершить игру</string>
 </resources>
